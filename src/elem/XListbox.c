@@ -108,6 +108,8 @@ char* gslc_ElemXListboxGetItemAddr(gslc_tsXListbox* pListbox, int16_t nItemCurSe
   uint16_t   nBufPos = 0;
   int16_t    nItemInd = 0;
   bool       bFound = false;
+
+  if(pListbox->nItemCnt>0 && nItemCurSel<pListbox->nItemCnt)bFound=true;
   // while (1) {
   //   if (nItemInd == nItemCurSel) {
   //     bFound = true;
@@ -123,7 +125,6 @@ char* gslc_ElemXListboxGetItemAddr(gslc_tsXListbox* pListbox, int16_t nItemCurSe
   // }
 
   nBufPos=nItemCurSel*24;
-  bFound=true;
   if (bFound) {
     pBuf = (char*)&(pListbox->pBufItems[nBufPos]);
     return pBuf;
@@ -296,6 +297,21 @@ bool gslc_ElemXListboxAddItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, const 
   return true;
 }
 
+bool gslc_ElemXListboxUpdateExElement(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, uint16_t nInsertPos,gslc_tsXLExItem *ExItem)
+{
+  gslc_tsXListbox* pListbox = (gslc_tsXListbox*)gslc_GetXDataFromRef(pGui, pElemRef, GSLC_TYPEX_LISTBOX, __LINE__);
+  if (!pListbox) return false;
+
+  char *pBuf = gslc_ElemXListboxGetItemAddr(pListbox, nInsertPos);
+
+  memcpy(pBuf,ExItem,24);
+
+  uint16_t realsel=gslc_ElemXListboxGetSel(pGui,pElemRef);
+  gslc_ElemXListboxSetSel(pGui,pElemRef, nInsertPos);
+  //gslc_ElemXListboxDraw(pGui,pElemRef,GSLC_REDRAW_FAST_EXEL);
+  gslc_ElemXListboxSetSel(pGui,pElemRef, realsel);
+}
+
 bool gslc_ElemXListboxInsertItemAt(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, uint16_t nInsertPos, 
   const char* pStrItem)
 {
@@ -409,7 +425,7 @@ bool gslc_ElemXListboxDeleteItemAt(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, u
   pListbox->nItemCnt--;
   
   // unselect item
-  gslc_ElemXListboxSetSel(pGui, pElemRef, XLISTBOX_SEL_NONE);
+  //gslc_ElemXListboxSetSel(pGui, pElemRef, XLISTBOX_SEL_NONE);
 
 //  GSLC_DEBUG2_PRINT("Xlistbox:After DeleteAt %d\n", nDeletePos);
 //  debug_ElemXListboxDump(pGui, pElemRef);
@@ -440,6 +456,7 @@ bool gslc_ElemXListboxGetItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, int16_
   int16_t   nItemInd = 0;
   uint8_t*   pBuf = NULL;
   bool       bFound = false;
+  if(pListbox->nItemCnt>0 && nItemCurSel<pListbox->nItemCnt)bFound=true;
   // while (1) {
   //   if (nItemInd == nItemCurSel) {
   //     bFound = true;
@@ -454,7 +471,6 @@ bool gslc_ElemXListboxGetItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, int16_
   //   nBufPos++;
   // }
   nBufPos=nItemCurSel*24;
-  bFound=true;
   if (bFound) {
     pBuf = &(pListbox->pBufItems[nBufPos]);
     memcpy(pStrItem, (char*)pBuf, nStrItemLen);
@@ -556,7 +572,6 @@ gslc_tsElemRef* gslc_ElemXListboxCreate(gslc_tsGui* pGui,int16_t nElemId,int16_t
 // - Note that this redraw is for the entire element rect region
 // - The Draw function parameters use void pointers to allow for
 //   simpler callback function definition & scalability.
-char *pstr=NULL;
 bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw)
 {
 	GSLC_DEBUG2_PRINT("redraw type:%u\n\r",eRedraw);
@@ -697,6 +712,10 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
       } else if (nItemInd == nItemCurSel) {
         bDoRedraw = true;
       }
+    }else if (eRedraw == GSLC_REDRAW_FAST_EXEL) {
+      if (nItemInd == nItemCurSel) {
+        bDoRedraw = true;
+      }
     }
 
     // Draw the list item
@@ -715,15 +734,9 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
       // Set the text flags to indicate that the user has separately
       // allocated memory for the text strings.
       gslc_teTxtFlags eTxtFlags = GSLC_TXT_MEM_RAM | GSLC_TXT_ALLOC_EXT;
-      gslc_tsXLBElement auxstruct;
+      gslc_tsXLExItem auxstruct;
       memcpy(&auxstruct,acStr,24);
       
-      // GSLC_DEBUG2_PRINT("--%s--:",pstr);
-      // for (uint8_t i=0;i<32*3;i++){
-    	//   GSLC_DEBUG2_PRINT("-%s",pstr++);
-      // }
-      // GSLC_DEBUG2_PRINT("\n\r","");
-      // Draw the aligned text string (by default it is GSLC_ALIGN_MID_LEFT)
       gslc_DrawTxtBase(pGui, auxstruct.val1, rRect1, pElem->pTxtFont, eTxtFlags,
         pElem->eTxtAlign, colTxt, colFill, pElem->nTxtMarginX, pElem->nTxtMarginY);
       gslc_DrawTxtBase(pGui, auxstruct.val2, rRect2, pElem->pTxtFont, eTxtFlags,

@@ -61,6 +61,15 @@ extern "C" {
 /// Callback function for Listbox feedback
 typedef bool (*GSLC_CB_XLISTBOX_SEL)(void* pvGui,void* pvElem,int16_t nSel);
 
+// Extended Item data structures
+typedef struct{
+  char val1[XELEM_VAL_LEN];
+  char val2[XELEM_VAL_LEN];
+  char val3[XELEM_VAL_LEN];
+}gslc_tsXLExItem;
+
+#define GSLC_REDRAW_FAST_EXEL 5
+
 // Extended element data structures
 // - These data structures are maintained in the gslc_tsElem
 //   structure via the pXData pointer
@@ -100,12 +109,6 @@ typedef struct {
 
 } gslc_tsXListbox;
 
-
-typedef struct{
-  char val1[XELEM_VAL_LEN];
-  char val2[XELEM_VAL_LEN];
-  char val3[XELEM_VAL_LEN];
-}gslc_tsXLBElement;
 
 ///
 /// Create a Listbox Element
@@ -201,8 +204,19 @@ void gslc_ElemXListboxReset(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef);
 bool gslc_ElemXListboxAddItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, const char* pStrItem);
 
 ///
-/// Insert an item in the listbox at a specific position
+/// Update internal values of Extended Item
+/// Use it for a fast redraw of the strings only and avoids flickering
+/// \param[in]  pGui:          Pointer to GUI
+/// \param[in]  pElemRef:      Ptr to Element Reference to update
+/// \param[in]  pStrItem:      Extend item with the new string values
 ///
+/// \return true if OK, false if fail 
+///
+bool gslc_ElemXListboxUpdateExElement(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, uint16_t nInsertPos,gslc_tsXLExItem *ExItem);
+
+///
+/// Insert an item in the listbox at a specific position
+/// 
 /// \param[in]  pGui:          Pointer to GUI
 /// \param[in]  pElemRef:      Ptr to Element Reference to update
 /// \param[in]  nInsertPos:    Insertion position
