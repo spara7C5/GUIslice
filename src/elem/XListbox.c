@@ -39,7 +39,6 @@
 #include "elem/XListbox.h"
 
 #include <stdio.h>
-
 #if (GSLC_USE_PROGMEM)
   #if defined(__AVR__)
     #include <avr/pgmspace.h>
@@ -67,7 +66,7 @@ extern const char GSLC_PMEM ERRSTR_PXD_NULL[];
 
 // TODO: Combine with GUIslice MAX_STR
 // Defines the maximum length of a listbox item
-#define XLISTBOX_MAX_STR        20
+#define XLISTBOX_MAX_STR        200
 
 // ============================================================================
 // Extended Element: Listbox
@@ -109,19 +108,22 @@ char* gslc_ElemXListboxGetItemAddr(gslc_tsXListbox* pListbox, int16_t nItemCurSe
   uint16_t   nBufPos = 0;
   int16_t    nItemInd = 0;
   bool       bFound = false;
-  while (1) {
-    if (nItemInd == nItemCurSel) {
-      bFound = true;
-      break;
-    }
-    if (nBufPos >= pListbox->nBufItemsMax) {
-      break;
-    }
-    if (pListbox->pBufItems[nBufPos] == 0) {
-      nItemInd++;
-    }
-    nBufPos++;
-  }
+  // while (1) {
+  //   if (nItemInd == nItemCurSel) {
+  //     bFound = true;
+  //     break;
+  //   }
+  //   if (nBufPos >= pListbox->nBufItemsMax) {
+  //     break;
+  //   }
+  //   if (pListbox->pBufItems[nBufPos] == 0) {
+  //     nItemInd++;
+  //   }
+  //   nBufPos++;
+  // }
+
+  nBufPos=nItemCurSel*24;
+  bFound=true;
   if (bFound) {
     pBuf = (char*)&(pListbox->pBufItems[nBufPos]);
     return pBuf;
@@ -257,8 +259,8 @@ bool gslc_ElemXListboxAddItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, const 
   uint16_t    nBufItemsPos = pListbox->nBufItemsPos;
   uint16_t    nBufItemsMax = pListbox->nBufItemsMax;
 
-  nStrItemLen = strlen(pStrItem);
-
+  //nStrItemLen = strlen(pStrItem);
+  nStrItemLen=23;
   if (nStrItemLen == 0) {
     // Nothing to add
     return false;
@@ -278,7 +280,7 @@ bool gslc_ElemXListboxAddItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, const 
 
   // Treat this section of the buffer as [char]
   pBuf = (char*)pListbox->pBufItems + nBufItemsPos;
-  gslc_StrCopy(pBuf, pStrItem, nStrItemLen+1);
+  memcpy(pBuf, pStrItem, nStrItemLen+1);
   pListbox->nBufItemsPos += (nStrItemLen+1); // +1 for terminator
 
   pListbox->nItemCnt++;
@@ -310,8 +312,8 @@ bool gslc_ElemXListboxInsertItemAt(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, u
       pListbox->nItemCnt,nInsertPos);
     return false;
   }
-  nStrItemLen = strlen(pStrItem);
-
+  //nStrItemLen = strlen(pStrItem);
+  nStrItemLen=23;
   if (nStrItemLen == 0) {
     // Nothing to add
     return false;
@@ -385,7 +387,7 @@ bool gslc_ElemXListboxDeleteItemAt(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, u
   if (pBuf == NULL) {
     return false;
   }
-  nStrItemLen = strlen(pBuf);
+  nStrItemLen = 23;
   
   // Pull items after this delete position up to delete this item
   char* pSrc  = (char*)pBuf+nStrItemLen+1;
@@ -432,26 +434,30 @@ bool gslc_ElemXListboxGetItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, int16_
     // ERROR
     return false;
   }
+
+
   uint16_t   nBufPos = 0;
   int16_t   nItemInd = 0;
   uint8_t*   pBuf = NULL;
   bool       bFound = false;
-  while (1) {
-    if (nItemInd == nItemCurSel) {
-      bFound = true;
-      break;
-    }
-    if (nBufPos >= pListbox->nBufItemsMax) {
-      break;
-    }
-    if (pListbox->pBufItems[nBufPos] == 0) {
-      nItemInd++;
-    }
-    nBufPos++;
-  }
+  // while (1) {
+  //   if (nItemInd == nItemCurSel) {
+  //     bFound = true;
+  //     break;
+  //   }
+  //   if (nBufPos >= pListbox->nBufItemsMax) {
+  //     break;
+  //   }
+  //   if (pListbox->pBufItems[nBufPos] == 0) {
+  //     nItemInd++;
+  //   }
+  //   nBufPos++;
+  // }
+  nBufPos=nItemCurSel*24;
+  bFound=true;
   if (bFound) {
     pBuf = &(pListbox->pBufItems[nBufPos]);
-    gslc_StrCopy(pStrItem, (char*)pBuf, nStrItemLen);
+    memcpy(pStrItem, (char*)pBuf, nStrItemLen);
     return true;
   } else {
     // If no item was found, return an empty string (NULL)
@@ -528,7 +534,7 @@ gslc_tsElemRef* gslc_ElemXListboxCreate(gslc_tsGui* pGui,int16_t nElemId,int16_t
 
   // Set default text alignment:
   // - Vertical center, left justify
-  sElem.eTxtAlign        = GSLC_ALIGN_MID_LEFT;
+  sElem.eTxtAlign        = GSLC_ALIGN_MID_MID;
 
   if (nPage != GSLC_PAGE_NONE) {
     pElemRef = gslc_ElemAdd(pGui,nPage,&sElem,GSLC_ELEMREF_DEFAULT);
@@ -550,8 +556,10 @@ gslc_tsElemRef* gslc_ElemXListboxCreate(gslc_tsGui* pGui,int16_t nElemId,int16_t
 // - Note that this redraw is for the entire element rect region
 // - The Draw function parameters use void pointers to allow for
 //   simpler callback function definition & scalability.
+char *pstr=NULL;
 bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw)
 {
+	GSLC_DEBUG2_PRINT("redraw type:%u\n\r",eRedraw);
   // Typecast the parameters to match the GUI and element types
   gslc_tsGui*       pGui  = (gslc_tsGui*)(pvGui);
   gslc_tsElemRef*   pElemRef = (gslc_tsElemRef*)(pvElemRef);
@@ -620,7 +628,7 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
   // Determine top-left coordinate of list matrix
   nItemBaseX = nX0 + pListbox->nMarginW;
   nItemBaseY = nY0 + pListbox->nMarginH;
-  char acStr[XLISTBOX_MAX_STR+1] = "";
+  char acStr[XLISTBOX_MAX_STR+1] = {};
 
 
   // Loop through the items in the list
@@ -645,7 +653,7 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
     }
 
     // Fetch the list item
-    bool bOk = gslc_ElemXListboxGetItem(pGui, pElemRef, nItemInd, acStr, XLISTBOX_MAX_STR);
+    bool bOk = gslc_ElemXListboxGetItem(pGui, pElemRef, nItemInd, acStr, 24);
     if (!bOk) {
       // TODO: Erorr handling
       break;
@@ -693,15 +701,35 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
 
     // Draw the list item
     if (bDoRedraw) {
-      gslc_DrawFillRect(pGui, rItemRect, colFill);
+      gslc_tsRect   rRect1=rItemRect;
+      rRect1.w=(rItemRect.w-(4*2))/3;
+      gslc_tsRect   rRect2=rRect1;
+      rRect2.x=rRect1.x+rRect1.w+4;
+      gslc_tsRect   rRect3=rRect2;
+      rRect3.x=rRect2.x+rRect2.w+4;
+
+      gslc_DrawFillRect(pGui, rRect1, colFill);
+      gslc_DrawFillRect(pGui, rRect2, colFill);
+      gslc_DrawFillRect(pGui, rRect3, colFill);
 
       // Set the text flags to indicate that the user has separately
       // allocated memory for the text strings.
       gslc_teTxtFlags eTxtFlags = GSLC_TXT_MEM_RAM | GSLC_TXT_ALLOC_EXT;
-
+      gslc_tsXLBElement auxstruct;
+      memcpy(&auxstruct,acStr,24);
+      
+      // GSLC_DEBUG2_PRINT("--%s--:",pstr);
+      // for (uint8_t i=0;i<32*3;i++){
+    	//   GSLC_DEBUG2_PRINT("-%s",pstr++);
+      // }
+      // GSLC_DEBUG2_PRINT("\n\r","");
       // Draw the aligned text string (by default it is GSLC_ALIGN_MID_LEFT)
-      gslc_DrawTxtBase(pGui, acStr, rItemRect, pElem->pTxtFont, eTxtFlags,
+      gslc_DrawTxtBase(pGui, auxstruct.val1, rRect1, pElem->pTxtFont, eTxtFlags,
         pElem->eTxtAlign, colTxt, colFill, pElem->nTxtMarginX, pElem->nTxtMarginY);
+      gslc_DrawTxtBase(pGui, auxstruct.val2, rRect2, pElem->pTxtFont, eTxtFlags,
+    		  pElem->eTxtAlign, colTxt, colFill, pElem->nTxtMarginX, pElem->nTxtMarginY);
+      gslc_DrawTxtBase(pGui, auxstruct.val3, rRect3, pElem->pTxtFont, eTxtFlags,
+    		  pElem->eTxtAlign, colTxt, colFill, pElem->nTxtMarginX, pElem->nTxtMarginY);
     }
 
   }

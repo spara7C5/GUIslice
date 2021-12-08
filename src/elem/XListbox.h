@@ -56,6 +56,8 @@ extern "C" {
 #define XLISTBOX_SIZE_AUTO      -1  // Indicator for "auto-size"
 #define XLISTBOX_BUF_OH_R        2  // Listbox buffer overhead per row
 
+// Extended element
+#define XELEM_VAL_LEN 8
 /// Callback function for Listbox feedback
 typedef bool (*GSLC_CB_XLISTBOX_SEL)(void* pvGui,void* pvElem,int16_t nSel);
 
@@ -98,6 +100,12 @@ typedef struct {
 
 } gslc_tsXListbox;
 
+
+typedef struct{
+  char val1[XELEM_VAL_LEN];
+  char val2[XELEM_VAL_LEN];
+  char val3[XELEM_VAL_LEN];
+}gslc_tsXLBElement;
 
 ///
 /// Create a Listbox Element

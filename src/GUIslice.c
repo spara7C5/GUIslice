@@ -408,6 +408,7 @@ typedef enum {
 // - g_pfDebugOut defined
 void gslc_DebugPrintf(const char* pFmt, ...)
 {
+
   if (g_pfDebugOut) {
 
     char*    pStr=NULL;

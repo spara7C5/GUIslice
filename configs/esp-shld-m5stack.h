@@ -122,7 +122,7 @@ extern "C" {
   //   - DEBUG_ERR 2 = Enable verbose error messaging (eg. bad parameters, etc.)
   // - For baseline Arduino UNO, recommended to disable this after one has
   //   confirmed basic operation of the library is successful.
-  #define DEBUG_ERR               1   // 1,2 to enable, 0 to disable
+  #define DEBUG_ERR               2   // 1,2 to enable, 0 to disable
 
   // Debug initialization message
   // - By default, GUIslice outputs a message in DEBUG_ERR mode

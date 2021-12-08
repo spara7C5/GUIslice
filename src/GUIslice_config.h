@@ -122,7 +122,7 @@ extern "C" {
 
   // ESP8266, ESP32, M5stack, WIO Terminal, TTGO:
   // ------------------------------------------------------
-  //#include "../configs/esp-shld-m5stack.h"
+  #include "../configs/esp-shld-m5stack.h"
   //#include "../configs/esp-shld-wio-notouch.h"
   //#include "../configs/esp-shld-wio-input.h"
   //#include "../configs/esp-shld-ttgo_btc_ticker.h"
