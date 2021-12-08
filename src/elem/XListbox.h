@@ -56,19 +56,26 @@ extern "C" {
 #define XLISTBOX_SIZE_AUTO      -1  // Indicator for "auto-size"
 #define XLISTBOX_BUF_OH_R        2  // Listbox buffer overhead per row
 
-// Extended element
-#define XELEM_VAL_LEN 8
+
 /// Callback function for Listbox feedback
 typedef bool (*GSLC_CB_XLISTBOX_SEL)(void* pvGui,void* pvElem,int16_t nSel);
 
-// Extended Item data structures
+// Extended element struct and defines
+#define XELEM_VAL_LEN 16
+#define GSLC_REDRAW_FAST_EXEL 5
 typedef struct{
   char val1[XELEM_VAL_LEN];
   char val2[XELEM_VAL_LEN];
   char val3[XELEM_VAL_LEN];
 }gslc_tsXLExItem;
+#define EXITEMSIZE sizeof(gslc_tsXLExItem)
 
-#define GSLC_REDRAW_FAST_EXEL 5
+#define EXITEM_RECT_DIVISION 8
+#define EXITEM_RECT_NAME  4
+#define EXITEM_RECT_VAL  2
+#define EXITEM_RECT_UNIT  2
+#define EXITEM_RECT_SPACE 4
+
 
 // Extended element data structures
 // - These data structures are maintained in the gslc_tsElem

@@ -124,7 +124,7 @@ char* gslc_ElemXListboxGetItemAddr(gslc_tsXListbox* pListbox, int16_t nItemCurSe
   //   nBufPos++;
   // }
 
-  nBufPos=nItemCurSel*24;
+  nBufPos=nItemCurSel*EXITEMSIZE;
   if (bFound) {
     pBuf = (char*)&(pListbox->pBufItems[nBufPos]);
     return pBuf;
@@ -261,7 +261,7 @@ bool gslc_ElemXListboxAddItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, const 
   uint16_t    nBufItemsMax = pListbox->nBufItemsMax;
 
   //nStrItemLen = strlen(pStrItem);
-  nStrItemLen=23;
+  nStrItemLen=EXITEMSIZE-1;
   if (nStrItemLen == 0) {
     // Nothing to add
     return false;
@@ -304,7 +304,7 @@ bool gslc_ElemXListboxUpdateExElement(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef
 
   char *pBuf = gslc_ElemXListboxGetItemAddr(pListbox, nInsertPos);
 
-  memcpy(pBuf,ExItem,24);
+  memcpy(pBuf,ExItem,EXITEMSIZE);
 
   uint16_t realsel=gslc_ElemXListboxGetSel(pGui,pElemRef);
   gslc_ElemXListboxSetSel(pGui,pElemRef, nInsertPos);
@@ -329,7 +329,7 @@ bool gslc_ElemXListboxInsertItemAt(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, u
     return false;
   }
   //nStrItemLen = strlen(pStrItem);
-  nStrItemLen=23;
+  nStrItemLen=EXITEMSIZE-1;
   if (nStrItemLen == 0) {
     // Nothing to add
     return false;
@@ -403,7 +403,7 @@ bool gslc_ElemXListboxDeleteItemAt(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, u
   if (pBuf == NULL) {
     return false;
   }
-  nStrItemLen = 23;
+  nStrItemLen = EXITEMSIZE-1;
   
   // Pull items after this delete position up to delete this item
   char* pSrc  = (char*)pBuf+nStrItemLen+1;
@@ -470,7 +470,7 @@ bool gslc_ElemXListboxGetItem(gslc_tsGui* pGui, gslc_tsElemRef* pElemRef, int16_
   //   }
   //   nBufPos++;
   // }
-  nBufPos=nItemCurSel*24;
+  nBufPos=nItemCurSel*EXITEMSIZE;
   if (bFound) {
     pBuf = &(pListbox->pBufItems[nBufPos]);
     memcpy(pStrItem, (char*)pBuf, nStrItemLen);
@@ -668,7 +668,7 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
     }
 
     // Fetch the list item
-    bool bOk = gslc_ElemXListboxGetItem(pGui, pElemRef, nItemInd, acStr, 24);
+    bool bOk = gslc_ElemXListboxGetItem(pGui, pElemRef, nItemInd, acStr, EXITEMSIZE);
     if (!bOk) {
       // TODO: Erorr handling
       break;
@@ -721,11 +721,14 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
     // Draw the list item
     if (bDoRedraw) {
       gslc_tsRect   rRect1=rItemRect;
-      rRect1.w=(rItemRect.w-(4*2))/3;
+      uint16_t FractWid=(rItemRect.w-(EXITEM_RECT_SPACE*2))/EXITEM_RECT_DIVISION;
+      rRect1.w=FractWid*EXITEM_RECT_NAME;
       gslc_tsRect   rRect2=rRect1;
-      rRect2.x=rRect1.x+rRect1.w+4;
+      rRect2.x=rRect1.x+rRect1.w+EXITEM_RECT_SPACE;
+      rRect2.w=FractWid*EXITEM_RECT_VAL;
       gslc_tsRect   rRect3=rRect2;
-      rRect3.x=rRect2.x+rRect2.w+4;
+      rRect3.x=rRect2.x+rRect2.w+EXITEM_RECT_SPACE;
+      rRect3.w=FractWid*EXITEM_RECT_UNIT;
 
       gslc_DrawFillRect(pGui, rRect1, colFill);
       gslc_DrawFillRect(pGui, rRect2, colFill);
@@ -735,7 +738,7 @@ bool gslc_ElemXListboxDraw(void* pvGui,void* pvElemRef,gslc_teRedrawType eRedraw
       // allocated memory for the text strings.
       gslc_teTxtFlags eTxtFlags = GSLC_TXT_MEM_RAM | GSLC_TXT_ALLOC_EXT;
       gslc_tsXLExItem auxstruct;
-      memcpy(&auxstruct,acStr,24);
+      memcpy(&auxstruct,acStr,EXITEMSIZE);
       
       gslc_DrawTxtBase(pGui, auxstruct.val1, rRect1, pElem->pTxtFont, eTxtFlags,
         pElem->eTxtAlign, colTxt, colFill, pElem->nTxtMarginX, pElem->nTxtMarginY);
